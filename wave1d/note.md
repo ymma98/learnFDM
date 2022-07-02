@@ -49,6 +49,8 @@ $$
 
 # 构造解析解测试收敛率
 
+## 构造解析解
+
 我们解析解的约束是: $u(0,t)=u(L,t)=0$, 于是我们选择解析解的形式为:
 $$
 u_e(x,t)  = x(L-x) \mathrm{sin}t
@@ -59,11 +61,71 @@ $$
 f(x,t) = 2c^2 \mathrm{sin} t-(L-x)x\mathrm{sin}t
 $$
 
+得到初始条件为:
+$$
+u(x,0) = 0 \\
+u_t(x, 0) = x(L-x)
+$$
+
+当选用以上方程的时候, 我们可以方便地测试算法的正确性。
+
+## 收敛率定义
+
+为了测试收敛率 (convergence rate), 我们需要构造一系列的算例, 让每个算例的时间或者空间网格都比上一个算例的网格更精细。收敛率的测试依赖于假设:
+
+$$
+E = C_t \Delta t^r + C_x \Delta x^p
+$$
+其中 $E$ 是数值误差, $C_t$, $C_x$, $r$ 和 $p$ 是常数。$r$ 是时间上的收敛率, $p$ 是空间上的收敛率。对于我们采用的中心差分的离散方法, 我们期待 $r=p=2$ (根据截断误差的推导)。
+
+通常来说, $C_t$ 和 $C_x$ 的值的大小, 我们是不关心的。
+
+还有一种误差的简化表示法。根据 Courant number $C= c\frac{\Delta t}{\Delta x}$, 并令 $h=\Delta t$, 我们有:
+
+$$
+E = C_t \Delta t^r + C_x \Delta x^r = C_t h^r + C_x \left(\frac{c}{C}\right)^r h^r = Dh^r \\
+D = C_t + C_x \left(\frac{c}{C}\right)^r
+$$
+
+## 计算误差
+
+首先, 定义一个初始的 $h_0$, 然后定义随后的$h$:
+
+$$
+h_i = 2^{-i} h_0, \quad i=0,1,2,...,m
+$$
+对于每一个算例, 我们都记录 $E$ 和 $h$。 常见的 $E$ 有两种选择方法, $\ell^2$ norm 或者 $\ell^\infty$ norm:
+
+$$
+\begin{aligned}
+&E=\left\|e_{i}^{n}\right\|_{\ell^{2}}=\left(\Delta t \Delta x \sum_{n=0}^{N_{t}} \sum_{i=0}^{N_{x}}\left(e_{i}^{n}\right)^{2}\right)^{\frac{1}{2}}, \quad e_{i}^{n}=u_{\mathrm{e}}\left(x_{i}, t_{n}\right)-u_{i}^{n} \\
+&E=\left\|e_{i}^{n}\right\|_{\ell^{\infty}}=\max _{i, n}\left|e_{n}^{i}\right|
+\end{aligned}
+$$
+
+另外一种方式是记录单一时间步骤上的误差 $\ell^2$ 或 $\ell^\infty$, 比如在最后一个时间步上 ($n=N_t$):
+
+$$
+\begin{aligned}
+&E=\left\|e_{i}^{n}\right\|_{\ell^{2}}=\left(\Delta x \sum_{i=0}^{N_{x}}\left(e_{i}^{n}\right)^{2}\right)^{\frac{1}{2}}, \quad e_{i}^{n}=u_{\mathrm{e}}\left(x_{i}, t_{n}\right)-u_{i}^{n}, \\
+&E=\left\|e_{i}^{n}\right\|_{\ell^{\infty}}=\max _{0 \leq i \leq N_{x}}\left|e_{i}^{n}\right| .
+\end{aligned}
+$$
 
 
+## 计算收敛率
 
+令 $E_i$ 和 $h_i$ 对应于相应算例的误差和时间步, 则: $E_i = Dh_i^r$, 针对两次连续的算例, 有: 
+$$
+E_{i+1} = Dh_{i+1}^r \\
+E_i = Dh_i^r
+$$
+两次算例的 $E_i$ 相除以消去 $D$, 有:
+$$
+r = \frac{\ln\left( \frac{E_{i+1}}{i}\right)}{\ln \left(\frac{h_{i+1}}{h_i}\right)}
+$$
 
-
+对于 $0,1,...,m$ 这样 $m+1$ 个算例, 一共有 $m$ 个$r_i, \quad i=0,1,...,m-1$。对于当前的波动方程, 中心差分, 我们期待随着 $i$ 的增加 $r_i$ 收敛到 $2$.
 
 
 
